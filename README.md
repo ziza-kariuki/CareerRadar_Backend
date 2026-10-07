@@ -2,19 +2,6 @@
 
 > Flask REST API and PostgreSQL database for [CareerRadar](https://github.com/ziza-kariuki/Group4Project_CareerRadar), a job discovery platform.
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Status](#status)
-- [Core Features](#core-features)
-- [Tech Stack](#tech-stack)
-- [API Endpoints](#api-endpoints)
-- [Database Tables](#database-tables)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [Data Source](#data-source)
-
 ## Overview
 
 CareerRadar's Phase 1 was a React job explorer that called the Jobicy API directly. This repository holds the Phase 2 backend: a Flask API that lets the frontend search jobs, register and log in users, and save jobs that persist between visits.
@@ -144,3 +131,12 @@ DATABASE_URI=postgresql://<user>:<password>@localhost:5432/<database-name>
 ## Data Source
 
 Job listings come from the [Jobicy Remote Jobs API](https://jobicy.com/jobs-rss-feed). The backend requests up to 20 jobs per search.
+
+## Project Team
+
+- Gabriel Cosmas
+- Okech Martin
+- Teddy Learamo
+- Ziza Kariuki
+
+
