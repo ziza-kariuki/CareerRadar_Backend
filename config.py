@@ -21,3 +21,7 @@ class Config:
 
     JWT_TOKEN_LOCATION = ["headers"]
     JWT_ACCESS_TOKEN_EXPIRES = 3600
+class Config:
+    SECRET_KEY = os.getenv('SECRET_KEY', 'super-secret-key')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', 'postgresql://postgres:postgres@localhost:5432/careerradar_db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
