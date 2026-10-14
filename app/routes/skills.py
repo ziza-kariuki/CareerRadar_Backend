@@ -1,0 +1,71 @@
+"""Skill routes: the shared skill catalogue.
+
+A user's own skills (with proficiency, years, etc.) are managed in
+routes/profile.py under /profile/skills, so they are not repeated here.
+"""
+from flask import Blueprint, request
+from flask_jwt_extended import jwt_required
+
+from ..extensions import db
+from ..models.skill import Skill
+from ..utils.errors import ConflictError, NotFoundError, ValidationError
+from ..utils.responses import success
+
+skills_bp = Blueprint("skills", __name__)
+
+
+def find_skill_by_name(name):
+    """Case-insensitive lookup, so "Python" and "python" count as one skill."""
+    return Skill.query.filter(db.func.lower(Skill.name) == name.lower()).first()
+
+
+@skills_bp.get("")
+def list_skills():
+    """Public: list skills. Optional filters: ?search=py and ?category=Programming"""
+    search = request.args.get("search", "").strip()
+    category = request.args.get("category", "").strip()
+
+    query = Skill.query
+    if search:
+        query = query.filter(Skill.name.ilike(f"%{search}%"))
+    if category:
+        query = query.filter(db.func.lower(Skill.category) == category.lower())
+
+    skills = query.order_by(Skill.name).all()
+    return success(
+        data={"skills": [skill.to_dict() for skill in skills]},
+        message="Skills retrieved",
+    )
+
+
+@skills_bp.get("/<int:skill_id>")
+def get_skill(skill_id):
+    """Public: get one skill."""
+    skill = db.session.get(Skill, skill_id)
+    if skill is None:
+        raise NotFoundError("Skill not found.", code="SKILL_NOT_FOUND")
+    return success(data=skill.to_dict(), message="Skill retrieved")
+
+
+@skills_bp.post("")
+@jwt_required()
+def create_skill():
+    """Add a new skill to the shared catalogue."""
+    data = request.get_json(silent=True) or {}
+
+    name = data.get("name")
+    if not isinstance(name, str) or not name.strip():
+        raise ValidationError("Skill name is required.", code="VALIDATION_ERROR")
+    name = name.strip()
+
+    category = data.get("category")
+    if category is not None and not isinstance(category, str):
+        raise ValidationError("Category must be text.", code="VALIDATION_ERROR")
+
+    if find_skill_by_name(name):
+        raise ConflictError("That skill already exists.", code="SKILL_EXISTS")
+
+    skill = Skill(name=name, category=(category or "Custom").strip() or "Custom")
+    db.session.add(skill)
+    db.session.commit()
+    return success(data=skill.to_dict(), message="Skill created", status_code=201)
